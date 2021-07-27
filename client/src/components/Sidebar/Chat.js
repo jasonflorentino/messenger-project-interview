@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { Box } from "@material-ui/core";
-import { BadgeAvatar, ChatContent } from "../Sidebar";
+import { BadgeAvatar, ChatContent, MessageCounter } from "../Sidebar";
 import { withStyles } from "@material-ui/core/styles";
 import { setActiveChat } from "../../store/activeConversation";
 import { connect } from "react-redux";
@@ -27,6 +27,8 @@ class Chat extends Component {
   render() {
     const { classes } = this.props;
     const otherUser = this.props.conversation.otherUser;
+    const isUnread = this.props.conversation.id % 2 === 0;
+    console.log("conversation", this.props.conversation)
     return (
       <Box
         onClick={() => this.handleClick(this.props.conversation)}
@@ -38,7 +40,11 @@ class Chat extends Component {
           online={otherUser.online}
           sidebar={true}
         />
-        <ChatContent conversation={this.props.conversation} />
+        <ChatContent 
+          conversation={this.props.conversation} 
+          isUnread={isUnread}
+        />
+        {isUnread && <MessageCounter />}
       </Box>
     );
   }

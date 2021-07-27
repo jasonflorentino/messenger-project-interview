@@ -10,12 +10,19 @@ const useStyles = makeStyles((theme) => ({
     flexGrow: 1,
   },
   username: {
-    fontWeight: "bold",
+    fontWeight: "700",
     letterSpacing: -0.2,
   },
   previewText: {
     fontSize: 12,
+    fontWeight: "600",
     color: "#9CADC8",
+    letterSpacing: -0.17,
+  },
+  previewTextUnread: {
+    fontSize: "0.8rem",
+    color: "#111111",
+    fontWeight: "700",
     letterSpacing: -0.17,
   },
 }));
@@ -23,7 +30,7 @@ const useStyles = makeStyles((theme) => ({
 const ChatContent = (props) => {
   const classes = useStyles();
 
-  const { conversation } = props;
+  const { conversation, isUnread } = props;
   const { latestMessageText, otherUser } = conversation;
 
   return (
@@ -32,7 +39,9 @@ const ChatContent = (props) => {
         <Typography className={classes.username}>
           {otherUser.username}
         </Typography>
-        <Typography className={classes.previewText}>
+        <Typography
+          className={isUnread ? classes.previewTextUnread : classes.previewText}
+        >
           {latestMessageText}
         </Typography>
       </Box>
