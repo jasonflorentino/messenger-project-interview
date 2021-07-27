@@ -24,7 +24,7 @@ const useStyles = makeStyles(() => ({
   },
   text: {
     fontSize: 14,
-    fontWeight: "bold",
+    fontWeight: "700",
     color: "#FFFFFF",
     letterSpacing: -0.2,
     padding: 8

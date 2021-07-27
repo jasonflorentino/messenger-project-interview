@@ -11,7 +11,7 @@ const useStyles = makeStyles(() => ({
   date: {
     fontSize: 11,
     color: "#BECCE2",
-    fontWeight: "bold",
+    fontWeight: "600",
     marginBottom: 5
   },
   text: {
@@ -19,7 +19,7 @@ const useStyles = makeStyles(() => ({
     color: "#91A3C0",
     letterSpacing: -0.2,
     padding: 8,
-    fontWeight: "bold"
+    fontWeight: "600"
   },
   bubble: {
     background: "#F4F6FA",
