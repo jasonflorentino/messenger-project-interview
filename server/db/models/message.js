@@ -10,6 +10,11 @@ const Message = db.define("message", {
     type: Sequelize.INTEGER,
     allowNull: false,
   },
+  status: {
+    type: Sequelize.STRING,
+    defaultValue: "UNREAD",
+    allowNull: false,
+  }
 });
 
 module.exports = Message;
