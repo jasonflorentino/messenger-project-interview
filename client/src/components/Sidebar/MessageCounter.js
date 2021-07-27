@@ -12,12 +12,12 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const MessageCounter = () => {
+const MessageCounter = ({ count }) => {
   const classes = useStyles();
 
   return (
     <div className={classes.root}>
-      2
+      {count}
     </div>
   )
 }

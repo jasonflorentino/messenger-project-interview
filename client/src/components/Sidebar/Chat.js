@@ -4,6 +4,7 @@ import { BadgeAvatar, ChatContent, MessageCounter } from "../Sidebar";
 import { withStyles } from "@material-ui/core/styles";
 import { setActiveChat } from "../../store/activeConversation";
 import { connect } from "react-redux";
+import moment from "moment";
 
 const styles = {
   root: {
@@ -21,17 +22,17 @@ const styles = {
 
 class Chat extends Component {
   handleClick = async (conversation) => {
-    await this.props.setActiveChat(conversation.otherUser.username);
+    await this.props.setActiveChat(conversation.id);
   };
 
   render() {
-    const { classes } = this.props;
-    const otherUser = this.props.conversation.otherUser;
-    const isUnread = this.props.conversation.id % 2 === 0;
-    console.log("conversation", this.props.conversation)
+    const { classes, conversation } = this.props;
+    const otherUser = conversation.otherUser;
+    const unreadMessages = 0;
+
     return (
       <Box
-        onClick={() => this.handleClick(this.props.conversation)}
+        onClick={() => this.handleClick(conversation)}
         className={classes.root}
       >
         <BadgeAvatar
@@ -41,10 +42,10 @@ class Chat extends Component {
           sidebar={true}
         />
         <ChatContent 
-          conversation={this.props.conversation} 
-          isUnread={isUnread}
+          conversation={conversation} 
+          isUnread={!!unreadMessages}
         />
-        {isUnread && <MessageCounter />}
+        {!!unreadMessages && <MessageCounter count={unreadMessages} />}
       </Box>
     );
   }
