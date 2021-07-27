@@ -28,7 +28,9 @@ class Chat extends Component {
   render() {
     const { classes, conversation } = this.props;
     const otherUser = conversation.otherUser;
-    const unreadMessages = 0;
+
+    const unreadMessages = countUnreadMessages(conversation.messages, this.props.user.id);
+    console.log("conversation", this.props.conversation)
 
     return (
       <Box
@@ -51,6 +53,12 @@ class Chat extends Component {
   }
 }
 
+const mapStateToProps = (state) => {
+  return {
+    user: state.user
+  };
+}
+
 const mapDispatchToProps = (dispatch) => {
   return {
     setActiveChat: (id) => {
@@ -59,4 +67,21 @@ const mapDispatchToProps = (dispatch) => {
   };
 };
 
-export default connect(null, mapDispatchToProps)(withStyles(styles)(Chat));
+export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(Chat));
+
+function countUnreadMessages(messages = [], userId) {
+  if (!messages.length) return 0;
+  let i = messages.length - 1;
+  let curr = messages[i];
+  let unread = 0;
+
+  // While there are still messages and
+  // those messages aren't yours
+  while (i >= 0 && curr.senderId !== userId) {
+    if (curr.status === "UNREAD") unread++;
+    i--;
+    curr = messages[i];
+  }
+
+  return unread;
+}
