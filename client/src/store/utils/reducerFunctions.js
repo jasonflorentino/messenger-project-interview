@@ -81,3 +81,29 @@ export const addNewConvoToStore = (state, recipientId, message) => {
     }
   });
 };
+
+export const updateMsgReadStatusInStore = (state, ids) => {
+  const { messageId, conversationId } = ids;
+  return state.map((convo) => {
+    if (convo.id === conversationId) {
+      // Make new copies of convo and messages
+      const convoCopy = { ...convo };
+      const messagesCopy = [ ...convoCopy.messages ];
+      // Find index of message to update
+      const msgIdx = messagesCopy.findIndex(
+        (msg) => msg.id === messageId
+      );
+      // Create new message with true readStatus
+      const updatedMsg = {
+        ...messagesCopy[msgIdx],
+        readStatus: true
+      }
+      // Update message in copied array and set the array in convoCopy.
+      messagesCopy[msgIdx] = updatedMsg;
+      convoCopy.messages = messagesCopy;
+      return convoCopy;
+    } else {
+      return convo;
+    }
+  })
+}

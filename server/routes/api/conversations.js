@@ -20,8 +20,9 @@ router.get("/", async (req, res, next) => {
         },
       },
       attributes: ["id"],
+      order: [[ Message, "createdAt", "ASC" ]],
       include: [
-        { model: Message, order: [ ["createdAt", "ASC"] ] },
+        { model: Message, order: [["createdAt", "ASC"]] },
         {
           model: User,
           as: "user1",
@@ -96,5 +97,5 @@ function conversationSorter(a, b) {
 }
 
 function assertConvoWithMessages(conversation) {
-  return !Array.isArray(conversation.messages);
+  return Array.isArray(conversation.messages);
 }
