@@ -67,10 +67,12 @@ router.get("/", async (req, res, next) => {
       }
 
       // set properties for notification count and latest message preview
-      convoJSON.latestMessageText = convoJSON.messages[0].text;
+      const lastIdx = convoJSON.messages.length - 1;
+      convoJSON.latestMessageText = convoJSON.messages[lastIdx].text;
       conversations[i] = convoJSON;
     }
 
+    conversations.sort(conversationSorter);
     res.json(conversations);
   } catch (error) {
     next(error);
@@ -78,3 +80,11 @@ router.get("/", async (req, res, next) => {
 });
 
 module.exports = router;
+
+function conversationSorter(a, b) {
+  lastIdxA = a.messages.length - 1;
+  lastIdxB = b.messages.length - 1;
+  lastMsgA = a.messages[lastIdxA];
+  lastMsgB = b.messages[lastIdxB];
+  return new Date(lastMsgB.createdAt) - new Date(lastMsgA.createdAt);
+}
