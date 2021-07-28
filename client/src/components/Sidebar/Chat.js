@@ -4,7 +4,6 @@ import { BadgeAvatar, ChatContent, MessageCounter } from "../Sidebar";
 import { withStyles } from "@material-ui/core/styles";
 import { setActiveChat } from "../../store/activeConversation";
 import { connect } from "react-redux";
-import moment from "moment";
 
 const styles = {
   root: {
@@ -69,6 +68,14 @@ const mapDispatchToProps = (dispatch) => {
 
 export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(Chat));
 
+/**
+ * Given and array of messages sorted from oldest to newest, 
+ * and your `userId`, returns the number of messages that 
+ * aren't yours and are unread since the last message you sent.
+ * @param {[]} messages 
+ * @param {number} userId 
+ * @returns The number of unread messages since your last message
+ */
 function countUnreadMessages(messages = [], userId) {
   if (!messages.length) return 0;
   let i = messages.length - 1;
@@ -78,7 +85,7 @@ function countUnreadMessages(messages = [], userId) {
   // While there are still messages and
   // those messages aren't yours
   while (i >= 0 && curr.senderId !== userId) {
-    if (curr.status === "UNREAD") unread++;
+    if (curr.readStatus === false) unread++;
     i--;
     curr = messages[i];
   }
