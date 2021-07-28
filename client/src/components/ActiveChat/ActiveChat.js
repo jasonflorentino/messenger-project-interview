@@ -3,6 +3,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { Box } from "@material-ui/core";
 import { Input, Header, Messages } from "./index";
 import { connect } from "react-redux";
+import { readMessage } from "../../store/utils/thunkCreators";
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -22,8 +23,16 @@ const useStyles = makeStyles(() => ({
 
 const ActiveChat = (props) => {
   const classes = useStyles();
-  const { user } = props;
+  const { user, readMessage } = props;
   const conversation = props.conversation || {};
+
+  const handleReadMessage = async (message) => {
+    const ids = {
+      messageId: message.id,
+      conversationId: message.conversationId
+    }
+    await readMessage(ids);
+  }
 
   return (
     <Box className={classes.root}>
@@ -38,6 +47,7 @@ const ActiveChat = (props) => {
               messages={conversation.messages}
               otherUser={conversation.otherUser}
               userId={user.id}
+              handleReadMessage={handleReadMessage}
             />
             <Input
               otherUser={conversation.otherUser}
@@ -62,4 +72,12 @@ const mapStateToProps = (state) => {
   };
 };
 
-export default connect(mapStateToProps, null)(ActiveChat);
+const mapDispatchToProps = (dispatch) => {
+  return {
+    readMessage: (ids) => {
+      dispatch(readMessage(ids));
+    },
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(ActiveChat);

@@ -117,6 +117,7 @@ export const postMessage = (body) => async (dispatch) => {
 export const readMessage = (body) => async (dispatch) => {
   try {
     const rows = await putMessageReadStatus(body);
+    // rows will be an array with 0 or 1 for the number of rows updated in the DB
     if (rows && rows[0] === 1) {
       dispatch(readMessageAction(body))
     }
