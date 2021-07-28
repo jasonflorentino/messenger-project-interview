@@ -81,10 +81,20 @@ router.get("/", async (req, res, next) => {
 
 module.exports = router;
 
+/**
+ * Sorting function for an array of conversations
+ * each with its own `messages` array.
+ * @returns Descending order from `createdAt` date of the last message in the messages array
+ */
 function conversationSorter(a, b) {
+  if (!assertConvoWithMessages(a) || !assertConvoWithMessages(b)) return 0;
   lastIdxA = a.messages.length - 1;
   lastIdxB = b.messages.length - 1;
   lastMsgA = a.messages[lastIdxA];
   lastMsgB = b.messages[lastIdxB];
-  return new Date(lastMsgB.createdAt) - new Date(lastMsgA.createdAt);
+  return new Date(lastMsgB?.createdAt) - new Date(lastMsgA?.createdAt);
+}
+
+function assertConvoWithMessages(conversation) {
+  return !Array.isArray(conversation.messages);
 }
