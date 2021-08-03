@@ -73,20 +73,43 @@ export const logout = (id) => async (dispatch) => {
 export const fetchConversations = () => async (dispatch) => {
   try {
     const { data } = await axios.get("/api/conversations");
+    // Add unreadMessages property to each conversation
+    data.forEach((conversation) => {
+      const { messages, otherUser } = conversation;
+      // Count unread messages when we first get the conversations
+      conversation.unreadMessages = countUnreadMessages(messages, otherUser.id);
+    })
     dispatch(gotConversations(data));
   } catch (error) {
     console.error(error);
   }
 };
 
+/**
+ * Given and array of messages sorted from oldest to newest, 
+ * and the `otherUserId`, returns the number of messages that 
+ * aren't yours and are unread since the last message you sent.
+ * @param {[]} messages 
+ * @param {number} otherUserId 
+ * @returns The number of unread messages since your last message
+ */
+function countUnreadMessages(messages = [], otherUserId) {
+  if (!messages.length) return 0;
+  let i = messages.length - 1;
+  let curr = messages[i];
+  let unread = 0;
+  // While there are still messages and
+  // those messages aren't yours
+  while (i >= 0 && curr.senderId === otherUserId) {
+    if (curr.readStatus === false) unread++;
+    curr = messages[--i];
+  }
+  return unread;
+}
+
 const saveMessage = async (body) => {
   const { data } = await axios.post("/api/messages", body);
   return data;
-};
-
-const putMessageReadStatus = async (body) => {
-  const { data } = await axios.put("/api/messages/read", body);
-  return data?.updatedRows;
 };
 
 const sendMessage = (data, body) => {
@@ -114,17 +137,31 @@ export const postMessage = (body) => async (dispatch) => {
   }
 };
 
-export const readMessage = (body) => async (dispatch) => {
+// READ MESSAGES
+
+const readMessagesToServer = async (body) => {
+  const { data } = await axios.put("/api/messages/read", body);
+  return data?.updatedRows;
+};
+
+const emitReadMessages = (body) => {
+  socket.emit("read-messages", body);
+};
+
+export const readMessages = (body) => async (dispatch) => {
   try {
-    const rows = await putMessageReadStatus(body);
-    // rows will be an array with 0 or 1 for the number of rows updated in the DB
-    if (rows && rows[0] === 1) {
-      dispatch(readMessageAction(body))
+    const rows = await readMessagesToServer(body);
+    // rows will be an array of the number of rows updated in the DB
+    if (rows && rows[0] !== 0) {
+      dispatch(readMessageAction(body, rows[0]))
+      emitReadMessages(body);
     }
   } catch (error) {
     console.error(error);
   }
 }
+
+// SEARCH USERS
 
 export const searchUsers = (searchTerm) => async (dispatch) => {
   try {

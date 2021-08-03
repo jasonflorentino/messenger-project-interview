@@ -6,6 +6,7 @@ export const addMessageToStore = (state, payload) => {
       id: message.conversationId,
       otherUser: sender,
       messages: [message],
+      unreadMessages: 1,
     };
     newConvo.latestMessageText = message.text;
     return [newConvo, ...state];
@@ -16,7 +17,10 @@ export const addMessageToStore = (state, payload) => {
       const convoCopy = { ...convo };
       convoCopy.messages.push(message);
       convoCopy.latestMessageText = message.text;
-
+      // Increment unreadMessages if the new message isn't yours
+      if (convoCopy.otherUser.id === message.senderId) {
+        convoCopy.unreadMessages++;
+      }
       return convoCopy;
     } else {
       return convo;
@@ -82,25 +86,32 @@ export const addNewConvoToStore = (state, recipientId, message) => {
   });
 };
 
-export const updateMsgReadStatusInStore = (state, ids) => {
-  const { messageId, conversationId } = ids;
+export const updateMsgReadStatusInStore = (state, payload) => {
+  const { ids, numberOfReadMessages } = payload;
+  const { messageIds, conversationId } = ids;
   return state.map((convo) => {
     if (convo.id === conversationId) {
       // Make new copies of convo and messages
       const convoCopy = { ...convo };
       const messagesCopy = [ ...convoCopy.messages ];
-      // Find index of message to update
-      const msgIdx = messagesCopy.findIndex(
-        (msg) => msg.id === messageId
-      );
-      // Create new message with true readStatus
-      const updatedMsg = {
-        ...messagesCopy[msgIdx],
-        readStatus: true
+
+      for (const msgId of messageIds) {
+        // Find index of message to update
+        const msgIdx = messagesCopy.findIndex(
+          (msg) => msg.id === msgId
+        );
+        // Create new message with true readStatus
+        const updatedMsg = {
+          ...messagesCopy[msgIdx],
+          readStatus: true
+        }
+        // Update message in copied array
+        messagesCopy[msgIdx] = updatedMsg;
       }
-      // Update message in copied array and set the array in convoCopy.
-      messagesCopy[msgIdx] = updatedMsg;
+      // Replace messages array with updated copy
       convoCopy.messages = messagesCopy;
+      // Set or decrease number of unread messages
+      convoCopy.unreadMessages = convoCopy.unreadMessages ? convoCopy.unreadMessages - numberOfReadMessages : 0;
       return convoCopy;
     } else {
       return convo;
