@@ -53,10 +53,10 @@ router.put("/read", async (req, res, next) => {
     if (!req.user) return res.sendStatus(401);
 
     const senderId = req.user.id;
-    const { messageId, conversationId } = req.body;
+    const { messageIds, conversationId } = req.body;
 
     // Validate request
-    if (!messageId || !conversationId) {
+    if (!messageIds || !conversationId) {
       return res
         .status(400)
         .json({ error: "You must provide a message ID and conversation ID" });
@@ -69,7 +69,7 @@ router.put("/read", async (req, res, next) => {
       { readStatus: true }, 
       {
         where: { 
-          id: messageId, 
+          id: messageIds, 
           conversationId: conversationId,
           [Op.not]: [{ senderId: senderId }]
         },
