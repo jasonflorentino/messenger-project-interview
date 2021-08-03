@@ -4,7 +4,8 @@ import { Box, Typography, Avatar } from "@material-ui/core";
 
 const useStyles = makeStyles(() => ({
   root: {
-    display: "flex"
+    display: "flex",
+    marginBottom: 6,
   },
   avatar: {
     height: 30,

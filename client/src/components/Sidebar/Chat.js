@@ -27,9 +27,7 @@ class Chat extends Component {
   render() {
     const { classes, conversation } = this.props;
     const otherUser = conversation.otherUser;
-
-    const unreadMessages = countUnreadMessages(conversation.messages, this.props.user.id);
-    console.log("conversation", this.props.conversation)
+    const unreadMessages = conversation.unreadMessages || 0;
 
     return (
       <Box
@@ -67,28 +65,3 @@ const mapDispatchToProps = (dispatch) => {
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(Chat));
-
-/**
- * Given and array of messages sorted from oldest to newest, 
- * and your `userId`, returns the number of messages that 
- * aren't yours and are unread since the last message you sent.
- * @param {[]} messages 
- * @param {number} userId 
- * @returns The number of unread messages since your last message
- */
-function countUnreadMessages(messages = [], userId) {
-  if (!messages.length) return 0;
-  let i = messages.length - 1;
-  let curr = messages[i];
-  let unread = 0;
-
-  // While there are still messages and
-  // those messages aren't yours
-  while (i >= 0 && curr.senderId !== userId) {
-    if (curr.readStatus === false) unread++;
-    i--;
-    curr = messages[i];
-  }
-
-  return unread;
-}
