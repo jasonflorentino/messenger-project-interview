@@ -14,30 +14,47 @@ module.exports = (socket) => {
   socket.on(LOGOUT, logout);
   socket.on(NEW_MESSAGE, newMessage);
   socket.on(READ_MESSAGES, readMessages);
+  socket.on("disconnect", handleSocketDisconnect);
 
-  function goOnline(id) {
-    if (!onlineUsers.includes(id)) {
-      onlineUsers.add(id);
-    }
+  function goOnline(userid) {
+    onlineUsers.add(userid, socket.id);
     // send the user who just went online to everyone else who is already online
-    socket.broadcast.emit(ADD_ONLINE_USER, id);
+    socket.broadcast.emit(ADD_ONLINE_USER, userid);
   }
 
   function logout(id) {
-    if (onlineUsers.includes(id)) {
-      onlineUsers.remove(id);
+    onlineUsers.remove(id, socket.id);
+    // If user is no longer online
+    if (!onlineUsers.includes(id)) {
       socket.broadcast.emit(REMOVE_OFFLINE_USER, id);
     }
   }
 
   function newMessage(data) {
-    socket.broadcast.emit(NEW_MESSAGE, {
-      message: data.message,
-      sender: data.sender,
-    });
+    const recipient = data.recipientId;
+    const sender = data.message.senderId;
+    // All socketIds from both parties
+    const sessions = [
+      ...onlineUsers.getAllSessions(recipient),
+      ...onlineUsers.getAllSessions(sender),
+    ]
+    // Emit directly to each socket
+    for (const socketId of sessions) {
+      socket.to(socketId).emit(NEW_MESSAGE, {
+        message: data.message,
+        sender: data.sender,
+      });
+    }
   }
 
   function readMessages(body) {
     socket.broadcast.emit(READ_MESSAGES, body);
+  }
+
+  // Ensure online status is updated if socket is closed
+  // without explicitly requiring a logout event
+  function handleSocketDisconnect(_reason) {
+    const id = onlineUsers.getUserBySocket(socket.id);
+    logout(id, socket.id);
   }
 }
