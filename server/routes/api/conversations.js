@@ -72,6 +72,7 @@ router.get("/", async (req, res, next) => {
       // set properties for notification count and latest message preview
       const lastIdx = messages.length - 1;
       convoJSON.latestMessageText = messages[lastIdx].text;
+      convoJSON.lastReadMessageId = findLastReadMessage(messages, userId);
       convoJSON.unreadMessages = await Message.count({
         where: {
           conversationId: convoJSON.id,
@@ -108,4 +109,28 @@ function conversationSorter(a, b) {
 
 function assertConvoWithMessages(conversation) {
   return Array.isArray(conversation.messages);
+}
+
+/**
+ * Takes an array of messages and finds the message 
+ * that the other user last read
+ * @param {[]} messages 
+ * @param {number} userId 
+ * @returns {number} The ID of the message that the other user last read
+ */
+function findLastReadMessage(messages = [], userId) {
+  if (!messages.length) return -1;
+  let i = messages.length - 1;
+  let currMsg = messages[i];
+  while (i >= 0) {
+    // Go to last message you sent
+    if (currMsg.senderId !== userId) {
+      currMsg = messages[--i];
+      continue;
+    };
+    // Stop if it's been read
+    if (currMsg.readStatus === true) break;
+    currMsg = messages[--i];
+  }
+  return currMsg?.id || 0;
 }

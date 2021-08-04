@@ -13,19 +13,19 @@ const useStyles = makeStyles(() => ({
 }));
 
 const Messages = (props) => {
-  const { messages, otherUser, userId } = props;
+  const { messages, otherUser, userId, lastReadMessageId } = props;
   const classes = useStyles();
 
-  let lastReadIndex = findLastReadMessage(messages, userId);
   let readMarker = <Avatar alt={otherUser.username} src={otherUser.photoUrl} className={classes.avatar}></Avatar>;
 
   return (
     <Box>
-      {messages.map((message, i) => {
+      {messages.map((message) => {
         const time = moment(message.createdAt).format("h:mm");
+        const isLastRead = message.id === lastReadMessageId;
 
         return message.senderId === userId ? (
-          <SenderBubble key={message.id} text={message.text} time={time} readMarker={i === lastReadIndex && readMarker} />
+          <SenderBubble key={message.id} text={message.text} time={time} readMarker={isLastRead && readMarker} />
         ) : (
           <OtherUserBubble key={message.id} text={message.text} time={time} otherUser={otherUser} />
         );
@@ -35,20 +35,3 @@ const Messages = (props) => {
 };
 
 export default Messages;
-
-function findLastReadMessage(messages = [], userId) {
-  if (!messages.length) return -1;
-  let i = messages.length - 1;
-  let currMsg = messages[i];
-  while (i >= 0) {
-    // Go to last message you sent
-    if (currMsg.senderId !== userId) {
-      currMsg = messages[--i];
-      continue;
-    };
-    // Stop if it's been read
-    if (currMsg.readStatus === true) break;
-    currMsg = messages[--i];
-  }
-  return i;
-}
