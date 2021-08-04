@@ -112,21 +112,23 @@ export const postMessage = (body) => async (dispatch) => {
 // READ MESSAGES
 
 const readMessagesToServer = async (body) => {
-  const { data } = await axios.put("/api/messages/read", body);
-  return data?.updatedRows;
+  const { data } = await axios.patch("/api/messages/read", body);
+  return data?.updatedMessages;
 };
 
 const emitReadMessages = (body) => {
   socket.emit("read-messages", body);
 };
 
-export const readMessages = (body) => async (dispatch) => {
+export const readMessages = (ids) => async (dispatch) => {
   try {
-    const rows = await readMessagesToServer(body);
-    // rows will be an array of the number of rows updated in the DB
-    if (rows?.[0]) {
-      dispatch(readMessageAction(body, rows[0]))
-      emitReadMessages(body);
+    const updatedMessages = await readMessagesToServer(ids);
+    if (updatedMessages.length) {
+      dispatch(readMessageAction(ids, updatedMessages))
+      emitReadMessages({
+        ids,
+        updatedMessages,
+      });
     }
   } catch (error) {
     console.error(error);

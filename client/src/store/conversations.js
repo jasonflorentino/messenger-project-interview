@@ -70,10 +70,10 @@ export const addConversation = (recipientId, newMessage) => {
 };
 
 // update message status in store
-export const readMessageAction = (ids, numberOfReadMessages) => {
+export const readMessageAction = (ids, updatedMessages) => {
   return {
     type: READ_MESSAGE,
-    payload: { ids, numberOfReadMessages },
+    payload: { ids, updatedMessages },
   };
 }
 

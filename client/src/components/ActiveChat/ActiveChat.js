@@ -26,23 +26,20 @@ const ActiveChat = (props) => {
   const { user, readMessages } = props;
   const conversation = props.conversation || {};
 
-  const handleReadMessages = async (messageIds = [], convoId) => {
+  const handleReadMessages = async (convoId) => {
     const ids = {
-      messageIds: messageIds,
       conversationId: convoId
     }
     await readMessages(ids);
   }
 
-  // Read new, unread messages since last update
+  // Read unread messages since last update
   useEffect(() => {
     // Return if no messages or there are no messages to read
     if (!props.conversation?.messages) return;
     if (!props.conversation.unreadMessages) return;
-    const { conversation, conversation: { messages } } = props;
-    const messageIdsToUpdate = getMessagesIdsToUpdate(messages, user.id);
-    if (!messageIdsToUpdate.length) return;
-    handleReadMessages(messageIdsToUpdate, conversation.id);
+    const { conversation } = props;
+    handleReadMessages(conversation.id);
     // eslint-disable-next-line
   }, [props.conversation]);
 
@@ -93,23 +90,3 @@ const mapDispatchToProps = (dispatch) => {
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(ActiveChat);
-
-/**
- * @param {[]} messages An array of messages
- * @param {number} userId ID of the current user
- * @returns An array of message IDs for which update read status
- */
-function getMessagesIdsToUpdate(messages = [], userId) {
-  if (!messages.length) return [];
-  let i = messages.length - 1;
-  let currMsg = messages[i];
-  const messageIdsToUpdate = [];
-  // While the latest message isn't yours
-  while (i >= 0 && currMsg.senderId !== userId) {
-    // Stop if we hit old messages
-    if (currMsg.readStatus === true) break;
-    messageIdsToUpdate.push(currMsg.id);
-    currMsg = messages[--i];
-  }
-  return messageIdsToUpdate;
-}

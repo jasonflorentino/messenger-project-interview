@@ -48,35 +48,35 @@ router.post("/", async (req, res, next) => {
 });
 
 // Update a message readStatus to `true`
-router.put("/read", async (req, res, next) => {
+router.patch("/read", async (req, res, next) => {
   try { 
     if (!req.user) return res.sendStatus(401);
 
     const senderId = req.user.id;
-    const { messageIds, conversationId } = req.body;
+    const { conversationId } = req.body;
 
     // Validate request
-    if (!messageIds || !conversationId) {
+    if (!conversationId) {
       return res
         .status(400)
         .json({ error: "You must provide a message ID and conversation ID" });
     }
     if (!(await Conversation.isOwnConversation(senderId, conversationId)))
       return res.sendStatus(403);
-
     // Handle message update
     const updatedRows = await Message.update(
       { readStatus: true }, 
       {
         where: { 
-          id: messageIds, 
           conversationId: conversationId,
+          readStatus: false,
           [Op.not]: [{ senderId: senderId }]
         },
+        returning: true,
       }
     );
-
-    return res.json({ updatedRows });
+    // Updated message objects will be second element in updatedRows
+    return res.json({ updatedMessages: updatedRows[1] });
   } catch (error) {
     next(error);
   }

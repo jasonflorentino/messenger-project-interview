@@ -87,34 +87,43 @@ export const addNewConvoToStore = (state, recipientId, message) => {
 };
 
 export const updateMsgReadStatusInStore = (state, payload) => {
-  const { ids, numberOfReadMessages } = payload;
-  const { messageIds, conversationId } = ids;
+  const { ids, updatedMessages } = payload;
+  const { conversationId } = ids;
   return state.map((convo) => {
     if (convo.id === conversationId) {
-      // Make new copies of convo and messages
+      // Make new copy of convo
       const convoCopy = { ...convo };
-      const messagesCopy = [ ...convoCopy.messages ];
-
-      for (const msgId of messageIds) {
-        // Find index of message to update
-        const msgIdx = messagesCopy.findIndex(
-          (msg) => msg.id === msgId
-        );
-        // Create new message with true readStatus
-        const updatedMsg = {
-          ...messagesCopy[msgIdx],
-          readStatus: true
+      // Update necessary messages into new array
+      const updatedMessageLookup = makeMessageIdLookup(updatedMessages);
+      convoCopy.messages = convoCopy.messages.map((message) => {
+        const id = message.id;
+        if (updatedMessageLookup[id]) {
+          return updatedMessageLookup[id];
+        } else {
+          return message;
         }
-        // Update message in copied array
-        messagesCopy[msgIdx] = updatedMsg;
+      });
+      // Update last read message ID if your messages were the ones that got read
+      const updatedMessagesAreMine = convoCopy.otherUser.id !== updatedMessages[0].senderId;
+      if (updatedMessagesAreMine) {
+        const lastMessageIdx = updatedMessages.length - 1;
+        convoCopy.lastReadMessageId = updatedMessages[lastMessageIdx]?.id;
       }
-      // Replace messages array with updated copy
-      convoCopy.messages = messagesCopy;
-      // Set or decrease number of unread messages
-      convoCopy.unreadMessages = convoCopy.unreadMessages ? convoCopy.unreadMessages - numberOfReadMessages : 0;
+      // Reset unread message count
+      if (!updatedMessagesAreMine) {
+        convoCopy.unreadMessages = 0;
+      }
       return convoCopy;
     } else {
       return convo;
     }
   })
+}
+
+function makeMessageIdLookup(messages) {
+  const lookupTable = {};
+  for (const msg of messages) {
+    lookupTable[msg.id] = msg;
+  }
+  return lookupTable;
 }
