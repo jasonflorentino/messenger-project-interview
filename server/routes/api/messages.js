@@ -1,7 +1,9 @@
 const router = require("express").Router();
 const { Conversation, Message } = require("../../db/models");
 const onlineUsers = require("../../onlineUsers");
+const { Op } = require("sequelize");
 
+// Post new comment
 // expects {recipientId, text, conversationId } in body (conversationId will be null if no conversation exists yet)
 router.post("/", async (req, res, next) => {
   try {
@@ -40,6 +42,41 @@ router.post("/", async (req, res, next) => {
       conversationId: conversation.id,
     });
     res.json({ message, sender });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Update a message readStatus to `true`
+router.patch("/read", async (req, res, next) => {
+  try { 
+    if (!req.user) return res.sendStatus(401);
+
+    const senderId = req.user.id;
+    const { conversationId } = req.body;
+
+    // Validate request
+    if (!conversationId) {
+      return res
+        .status(400)
+        .json({ error: "You must provide a message ID and conversation ID" });
+    }
+    if (!(await Conversation.isOwnConversation(senderId, conversationId)))
+      return res.sendStatus(403);
+    // Handle message update
+    const updatedRows = await Message.update(
+      { readStatus: true }, 
+      {
+        where: { 
+          conversationId: conversationId,
+          readStatus: false,
+          [Op.not]: [{ senderId: senderId }]
+        },
+        returning: true,
+      }
+    );
+    // Updated message objects will be second element in updatedRows
+    return res.json({ updatedMessages: updatedRows[1] });
   } catch (error) {
     next(error);
   }

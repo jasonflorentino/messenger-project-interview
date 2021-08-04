@@ -6,6 +6,7 @@ export const addMessageToStore = (state, payload) => {
       id: message.conversationId,
       otherUser: sender,
       messages: [message],
+      unreadMessages: 1,
     };
     newConvo.latestMessageText = message.text;
     return [newConvo, ...state];
@@ -16,7 +17,10 @@ export const addMessageToStore = (state, payload) => {
       const convoCopy = { ...convo };
       convoCopy.messages.push(message);
       convoCopy.latestMessageText = message.text;
-
+      // Increment unreadMessages if the new message isn't yours
+      if (convoCopy.otherUser.id === message.senderId) {
+        convoCopy.unreadMessages++;
+      }
       return convoCopy;
     } else {
       return convo;
@@ -81,3 +85,45 @@ export const addNewConvoToStore = (state, recipientId, message) => {
     }
   });
 };
+
+export const updateMsgReadStatusInStore = (state, payload) => {
+  const { ids, updatedMessages } = payload;
+  const { conversationId } = ids;
+  return state.map((convo) => {
+    if (convo.id === conversationId) {
+      // Make new copy of convo
+      const convoCopy = { ...convo };
+      // Update necessary messages into new array
+      const updatedMessageLookup = makeMessageIdLookup(updatedMessages);
+      convoCopy.messages = convoCopy.messages.map((message) => {
+        const id = message.id;
+        if (updatedMessageLookup[id]) {
+          return updatedMessageLookup[id];
+        } else {
+          return message;
+        }
+      });
+      // Update last read message ID if your messages were the ones that got read
+      const updatedMessagesAreMine = convoCopy.otherUser.id !== updatedMessages[0].senderId;
+      if (updatedMessagesAreMine) {
+        const lastMessageIdx = updatedMessages.length - 1;
+        convoCopy.lastReadMessageId = updatedMessages[lastMessageIdx]?.id;
+      }
+      // Reset unread message count
+      if (!updatedMessagesAreMine) {
+        convoCopy.unreadMessages = 0;
+      }
+      return convoCopy;
+    } else {
+      return convo;
+    }
+  })
+}
+
+function makeMessageIdLookup(messages) {
+  const lookupTable = {};
+  for (const msg of messages) {
+    lookupTable[msg.id] = msg;
+  }
+  return lookupTable;
+}

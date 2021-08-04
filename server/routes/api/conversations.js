@@ -20,8 +20,9 @@ router.get("/", async (req, res, next) => {
         },
       },
       attributes: ["id"],
+      order: [[ Message, "createdAt", "ASC" ]],
       include: [
-        { model: Message, order: [ ["createdAt", "ASC"] ] },
+        { model: Message, order: [["createdAt", "ASC"]] },
         {
           model: User,
           as: "user1",
@@ -59,16 +60,27 @@ router.get("/", async (req, res, next) => {
         delete convoJSON.user2;
       }
 
+      const { messages, otherUser } = convoJSON;
+
       // set property for online status of the other user
-      if (onlineUsers.includes(convoJSON.otherUser.id)) {
-        convoJSON.otherUser.online = true;
+      if (onlineUsers.includes(otherUser.id)) {
+        otherUser.online = true;
       } else {
-        convoJSON.otherUser.online = false;
+        otherUser.online = false;
       }
 
       // set properties for notification count and latest message preview
-      const lastIdx = convoJSON.messages.length - 1;
-      convoJSON.latestMessageText = convoJSON.messages[lastIdx].text;
+      const lastIdx = messages.length - 1;
+      convoJSON.latestMessageText = messages[lastIdx].text;
+      convoJSON.lastReadMessageId = findLastReadMessage(messages, userId);
+      convoJSON.unreadMessages = await Message.count({
+        where: {
+          conversationId: convoJSON.id,
+          senderId: otherUser.id,
+          readStatus: false
+        }
+      })
+
       conversations[i] = convoJSON;
     }
 
@@ -96,5 +108,29 @@ function conversationSorter(a, b) {
 }
 
 function assertConvoWithMessages(conversation) {
-  return !Array.isArray(conversation.messages);
+  return Array.isArray(conversation.messages);
+}
+
+/**
+ * Takes an array of messages and finds the message 
+ * that the other user last read
+ * @param {[]} messages 
+ * @param {number} userId 
+ * @returns {number} The ID of the message that the other user last read
+ */
+function findLastReadMessage(messages = [], userId) {
+  if (!messages.length) return -1;
+  let i = messages.length - 1;
+  let currMsg = messages[i];
+  while (i >= 0) {
+    // Go to last message you sent
+    if (currMsg.senderId !== userId) {
+      currMsg = messages[--i];
+      continue;
+    };
+    // Stop if it's been read
+    if (currMsg.readStatus === true) break;
+    currMsg = messages[--i];
+  }
+  return currMsg?.id || 0;
 }
