@@ -70,9 +70,15 @@ router.get("/", async (req, res, next) => {
       }
 
       // set properties for notification count and latest message preview
-      convoJSON.unreadMessages = countUnreadMessages(messages, otherUser.id)
       const lastIdx = messages.length - 1;
       convoJSON.latestMessageText = messages[lastIdx].text;
+      convoJSON.unreadMessages = await Message.count({
+        where: {
+          conversationId: convoJSON.id,
+          senderId: otherUser.id,
+          readStatus: false
+        }
+      })
 
       conversations[i] = convoJSON;
     }
@@ -102,26 +108,4 @@ function conversationSorter(a, b) {
 
 function assertConvoWithMessages(conversation) {
   return Array.isArray(conversation.messages);
-}
-
-/**
- * Given and array of messages sorted from oldest to newest, 
- * and the `otherUserId`, returns the number of messages that 
- * aren't yours and are unread since the last message you sent.
- * @param {[]} messages 
- * @param {number} otherUserId 
- * @returns The number of unread messages since your last message
- */
- function countUnreadMessages(messages = [], otherUserId) {
-  if (!messages.length) return 0;
-  let i = messages.length - 1;
-  let curr = messages[i];
-  let unread = 0;
-  // While there are still messages and
-  // those messages aren't yours
-  while (i >= 0 && curr.senderId === otherUserId) {
-    if (curr.readStatus === false) unread++;
-    curr = messages[--i];
-  }
-  return unread;
 }
