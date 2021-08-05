@@ -7,6 +7,7 @@ const READ_MESSAGES = "read-messages";
 const LOGOUT = "logout";
 const ADD_ONLINE_USER = "add-online-user";
 const REMOVE_OFFLINE_USER = "remove-offline-user";
+const DISCONNECT = "disconnect";
 
 // Event handlers
 module.exports = (socket) => {
@@ -14,7 +15,7 @@ module.exports = (socket) => {
   socket.on(LOGOUT, logout);
   socket.on(NEW_MESSAGE, newMessage);
   socket.on(READ_MESSAGES, readMessages);
-  socket.on("disconnect", handleSocketDisconnect);
+  socket.on(DISCONNECT, handleSocketDisconnect);
 
   function goOnline(userid) {
     onlineUsers.add(userid, socket.id);

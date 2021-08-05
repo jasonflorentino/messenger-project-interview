@@ -4,9 +4,6 @@ const onlineUsers = {
   isOnline: function(id) {
     return this._onlineUsers.has(id);
   },
-  includes: function(id) {
-    return this.isOnline(id);
-  },
   add: function(id, socketId) {
     if (this.isOnline(id)) {
       this._onlineUsers.get(id).add(socketId);
