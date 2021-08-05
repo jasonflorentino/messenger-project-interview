@@ -9,15 +9,17 @@ const useStyles = makeStyles(() => ({
   root: {
     display: "flex",
     flexGrow: 8,
-    flexDirection: "column"
+    flexDirection: "column",
+    height: "100vh",
   },
   chatContainer: {
-    marginLeft: 41,
-    marginRight: 41,
+    paddingLeft: 41,
+    paddingRight: 41,
     display: "flex",
     flexDirection: "column",
     flexGrow: 1,
-    justifyContent: "space-between"
+    justifyContent: "space-between",
+    overflow: "auto",
   }
 }));
 
@@ -58,12 +60,12 @@ const ActiveChat = (props) => {
               lastReadMessageId={conversation.lastReadMessageId}
               userId={user.id}
             />
-            <Input
-              otherUser={conversation.otherUser}
-              conversationId={conversation.id}
-              user={user}
-            />
           </Box>
+          <Input
+            otherUser={conversation.otherUser}
+            conversationId={conversation.id}
+            user={user}
+          />
         </>
       )}
     </Box>
