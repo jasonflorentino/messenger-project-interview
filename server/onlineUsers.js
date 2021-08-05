@@ -25,8 +25,13 @@ const onlineUsers = {
       }
     }
   },
-  getAllSessions: function(id) {
-    return this._onlineUsers.get(id).values();
+  getSocketsByUserId: function(id) {
+    const userSessions = this._onlineUsers.get(id);
+    if (userSessions) {
+      return userSessions.values();
+    } else {
+      return [];
+    }
   },
   getUserBySocket(socketId) {
     return this._socketsByUser.get(socketId);

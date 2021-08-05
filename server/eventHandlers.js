@@ -24,8 +24,8 @@ module.exports = (socket) => {
 
   function logout(id) {
     onlineUsers.remove(id, socket.id);
-    // If user is no longer online
-    if (!onlineUsers.includes(id)) {
+    // If user is no longer online, all sockets closed
+    if (!onlineUsers.isOnline(id)) {
       socket.broadcast.emit(REMOVE_OFFLINE_USER, id);
     }
   }
@@ -33,10 +33,10 @@ module.exports = (socket) => {
   function newMessage(data) {
     const recipient = data.recipientId;
     const sender = data.message.senderId;
-    // All socketIds from both parties
+    // All socketIds for sender and recipient
     const sessions = [
-      ...onlineUsers.getAllSessions(recipient),
-      ...onlineUsers.getAllSessions(sender),
+      ...onlineUsers.getSocketsByUserId(recipient),
+      ...onlineUsers.getSocketsByUserId(sender),
     ]
     // Emit directly to each socket
     for (const socketId of sessions) {
@@ -51,8 +51,8 @@ module.exports = (socket) => {
     socket.broadcast.emit(READ_MESSAGES, body);
   }
 
-  // Ensure online status is updated if socket is closed
-  // without explicitly requiring a logout event
+  // Ensure online status is updated if socket is 
+  // closed without a logout event
   function handleSocketDisconnect(_reason) {
     const id = onlineUsers.getUserBySocket(socket.id);
     logout(id, socket.id);
