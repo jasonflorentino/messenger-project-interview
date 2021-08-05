@@ -29,7 +29,13 @@ const server = http.createServer(app);
  */
 
 const registerEventHandlers = require("../eventHandlers");
-const io = require("socket.io")(server);
+const options = {
+  cors: {
+    origin: "*",
+    methods: "GET,POST,PUT,PATCH,DELETE"
+  },
+}
+const io = require("socket.io")(server, options);
 
 const onConnection = (socket) => {
   registerEventHandlers(socket);

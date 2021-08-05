@@ -7,7 +7,7 @@ import {
   readMessageAction,
 } from "./store/conversations";
 
-const socket = io(window.location.origin);
+const socket = io(process.env.REACT_APP_SERVER_URL);
 
 socket.on("connect", () => {
   console.log("connected to server");
@@ -23,6 +23,9 @@ socket.on("connect", () => {
   });
   socket.on("read-messages", (data) => {
     store.dispatch(readMessageAction(data.ids, data.updatedMessages));
+  });
+  socket.on("disconnect", (reason) => {
+    console.log(`disconnected from server: ${reason}`)
   });
 });
 

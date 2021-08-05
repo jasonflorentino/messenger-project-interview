@@ -7,6 +7,7 @@ const session = require("express-session");
 const SequelizeStore = require("connect-session-sequelize")(session.Store);
 const db = require("./db");
 const { User } = require("./db/models");
+const cors = require("cors");
 // create store for sessions to persist in database
 const sessionStore = new SequelizeStore({ db });
 
@@ -16,6 +17,7 @@ const app = express();
 
 app.use(logger("dev"));
 app.use(json());
+app.use(cors());
 app.use(urlencoded({ extended: false }));
 app.use(express.static(join(__dirname, "public")));
 

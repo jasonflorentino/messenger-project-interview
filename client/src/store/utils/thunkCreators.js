@@ -12,7 +12,7 @@ import { gotUser, setFetchingStatus } from "../user";
 axios.interceptors.request.use(async function (config) {
   const token = await localStorage.getItem("messenger-token");
   config.headers["x-access-token"] = token;
-
+  config.baseURL = process.env.REACT_APP_SERVER_URL;
   return config;
 });
 
