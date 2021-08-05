@@ -11,6 +11,7 @@ const useStyles = makeStyles(() => ({
     flexGrow: 8,
     flexDirection: "column",
     height: "100vh",
+    width: "50%"
   },
   chatContainer: {
     paddingLeft: 41,
