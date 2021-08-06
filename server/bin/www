@@ -10,6 +10,8 @@ require("dotenv").config();
 const { app, sessionStore } = require("../app");
 const http = require("http");
 const db = require("../db");
+const jwt = require("jsonwebtoken");
+const registerEventHandlers = require("../eventHandlers");
 
 /**
  * Get port from environment and store in Express.
@@ -28,20 +30,43 @@ const server = http.createServer(app);
  * Listen on provided port, on all network interfaces, and sync database.
  */
 
-const registerEventHandlers = require("../eventHandlers");
+// Initialize socket server
+
 const options = {
   cors: {
     origin: "*",
     methods: "GET,POST,PUT,PATCH,DELETE"
   },
 }
+
 const io = require("socket.io")(server, options);
 
-const onConnection = (socket) => {
-  registerEventHandlers(socket);
+io.use(authenticateSocket);
+io.on("connection", onConnection);
+
+// Socket server helper functions
+
+function authenticateSocket(socket, next) {
+  const token = socket.handshake.auth?.token;
+  // Return error if no token or token is invalid
+  if (!token || !isValid(token)) {
+    const err = new Error("unauthorized");
+    return next(new Error(err));
+  }
+  next();
 }
 
-io.on("connection", onConnection);
+function isValid(token) {
+  try {
+    return !!jwt.verify(token, process.env.SESSION_SECRET)
+  } catch(err) {
+    return false;
+  }
+}
+
+function onConnection(socket) {
+  registerEventHandlers(socket);
+}
 
 sessionStore
   .sync()

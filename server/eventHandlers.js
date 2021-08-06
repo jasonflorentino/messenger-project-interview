@@ -56,6 +56,8 @@ module.exports = (socket) => {
   // closed without a logout event
   function handleSocketDisconnect(_reason) {
     const id = onlineUsers.getUserBySocket(socket.id);
-    logout(id, socket.id);
+    if (id && onlineUsers.isOnline(id)) {
+      logout(id, socket.id);
+    }
   }
 }
