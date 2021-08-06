@@ -32,14 +32,7 @@ const server = http.createServer(app);
 
 // Initialize socket server
 
-const options = {
-  cors: {
-    origin: "*",
-    methods: "GET,POST,PUT,PATCH,DELETE"
-  },
-}
-
-const io = require("socket.io")(server, options);
+const io = require("socket.io")(server);
 
 io.use(authenticateSocket);
 io.on("connection", onConnection);
