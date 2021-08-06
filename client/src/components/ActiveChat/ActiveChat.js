@@ -2,46 +2,55 @@ import { useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { Box } from "@material-ui/core";
 import { Input, Header, Messages } from "./index";
-import { connect } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { readMessages } from "../../store/utils/thunkCreators";
 
 const useStyles = makeStyles(() => ({
   root: {
     display: "flex",
     flexGrow: 8,
-    flexDirection: "column"
+    flexDirection: "column",
+    height: "100vh",
+    width: "50%"
   },
   chatContainer: {
-    marginLeft: 41,
-    marginRight: 41,
+    paddingLeft: 41,
+    paddingRight: 41,
     display: "flex",
     flexDirection: "column",
     flexGrow: 1,
-    justifyContent: "space-between"
+    justifyContent: "space-between",
+    overflow: "auto",
   }
 }));
 
-const ActiveChat = (props) => {
+const ActiveChat = () => {
   const classes = useStyles();
-  const { user, readMessages } = props;
-  const conversation = props.conversation || {};
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.user);
+  const conversation = useSelector((state) => {
+    const { conversations, activeConversation } = state;
+    const conversation = conversations && conversations.find(
+      (convo) => convo.otherUser.username === activeConversation
+    )
+    return conversation || {};
+  });
 
-  const handleReadMessages = async (convoId) => {
+  const handleReadMessages = (convoId) => {
     const ids = {
       conversationId: convoId
     }
-    await readMessages(ids);
+    dispatch(readMessages(ids));
   }
 
   // Read unread messages since last update
   useEffect(() => {
     // Return if no messages or there are no messages to read
-    if (!props.conversation?.messages) return;
-    if (!props.conversation.unreadMessages) return;
-    const { conversation } = props;
+    if (!conversation?.messages) return;
+    if (!conversation.unreadMessages) return;
     handleReadMessages(conversation.id);
     // eslint-disable-next-line
-  }, [props.conversation]);
+  }, [conversation]);
 
   return (
     <Box className={classes.root}>
@@ -58,35 +67,16 @@ const ActiveChat = (props) => {
               lastReadMessageId={conversation.lastReadMessageId}
               userId={user.id}
             />
-            <Input
-              otherUser={conversation.otherUser}
-              conversationId={conversation.id}
-              user={user}
-            />
           </Box>
+          <Input
+            otherUser={conversation.otherUser}
+            conversationId={conversation.id}
+            user={user}
+          />
         </>
       )}
     </Box>
   );
 };
 
-const mapStateToProps = (state) => {
-  return {
-    user: state.user,
-    conversation:
-      state.conversations &&
-      state.conversations.find(
-        (conversation) => conversation.otherUser.username === state.activeConversation
-      )
-  };
-};
-
-const mapDispatchToProps = (dispatch) => {
-  return {
-    readMessages: (ids) => {
-      dispatch(readMessages(ids));
-    },
-  };
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(ActiveChat);
+export default ActiveChat;

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Redirect, useHistory } from "react-router-dom";
-import { connect } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   Grid,
   Box,
@@ -12,9 +12,11 @@ import {
 } from "@material-ui/core";
 import { register } from "./store/utils/thunkCreators";
 
-const Login = (props) => {
+const Login = () => {
   const history = useHistory();
-  const { user, register } = props;
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.user);
+
   const [formErrorMessage, setFormErrorMessage] = useState({});
 
   const handleRegister = async (event) => {
@@ -29,7 +31,7 @@ const Login = (props) => {
       return;
     }
 
-    await register({ username, email, password });
+    dispatch(register({ username, email, password }));
   };
 
   if (user.id) {
@@ -49,6 +51,7 @@ const Login = (props) => {
               <FormControl>
                 <TextField
                   aria-label="username"
+                  autoComplete="username"
                   label="Username"
                   name="username"
                   type="text"
@@ -61,6 +64,7 @@ const Login = (props) => {
                 <TextField
                   label="E-mail address"
                   aria-label="e-mail address"
+                  autoComplete="email"
                   type="email"
                   name="email"
                   required
@@ -71,6 +75,7 @@ const Login = (props) => {
               <FormControl error={!!formErrorMessage.confirmPassword}>
                 <TextField
                   aria-label="password"
+                  autoComplete="new-password"
                   label="Password"
                   type="password"
                   inputProps={{ minLength: 6 }}
@@ -87,6 +92,7 @@ const Login = (props) => {
                 <TextField
                   label="Confirm Password"
                   aria-label="confirm password"
+                  autoComplete="confirm-password"
                   type="password"
                   inputProps={{ minLength: 6 }}
                   name="confirmPassword"
@@ -107,18 +113,4 @@ const Login = (props) => {
   );
 };
 
-const mapStateToProps = (state) => {
-  return {
-    user: state.user,
-  };
-};
-
-const mapDispatchToProps = (dispatch) => {
-  return {
-    register: (credentials) => {
-      dispatch(register(credentials));
-    },
-  };
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(Login);
+export default Login;

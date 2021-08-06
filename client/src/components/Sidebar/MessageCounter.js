@@ -1,4 +1,5 @@
 import React from 'react'
+import { Box } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 
 const useStyles = makeStyles((theme) => ({
@@ -16,9 +17,9 @@ const MessageCounter = ({ count }) => {
   const classes = useStyles();
 
   return (
-    <div className={classes.root}>
+    <Box className={classes.root}>
       {count}
-    </div>
+    </Box>
   )
 }
 

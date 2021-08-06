@@ -1,4 +1,4 @@
-import React from "react";
+import { useEffect, useRef } from "react";
 import { Box, Avatar } from "@material-ui/core";
 import { SenderBubble, OtherUserBubble } from "../ActiveChat";
 import moment from "moment";
@@ -16,6 +16,16 @@ const Messages = (props) => {
   const { messages, otherUser, userId, lastReadMessageId } = props;
   const classes = useStyles();
 
+  const messagesBottomRef = useRef(null);
+
+  const scrollToBottom = () => {
+    messagesBottomRef.current?.scrollIntoView();
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
   let readMarker = <Avatar alt={otherUser.username} src={otherUser.photoUrl} className={classes.avatar}></Avatar>;
 
   return (
@@ -30,6 +40,7 @@ const Messages = (props) => {
           <OtherUserBubble key={message.id} text={message.text} time={time} otherUser={otherUser} />
         );
       })}
+      <Box ref={messagesBottomRef} />
     </Box>
   );
 };
