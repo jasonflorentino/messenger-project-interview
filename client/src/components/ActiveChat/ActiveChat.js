@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { Box } from "@material-ui/core";
 import { Input, Header, Messages } from "./index";
-import { connect } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { readMessages } from "../../store/utils/thunkCreators";
 
 const useStyles = makeStyles(() => ({
@@ -24,27 +24,33 @@ const useStyles = makeStyles(() => ({
   }
 }));
 
-const ActiveChat = (props) => {
+const ActiveChat = () => {
   const classes = useStyles();
-  const { user, readMessages } = props;
-  const conversation = props.conversation || {};
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.user);
+  const conversation = useSelector((state) => {
+    const { conversations, activeConversation } = state;
+    const conversation = conversations && conversations.find(
+      (convo) => convo.otherUser.username === activeConversation
+    )
+    return conversation || {};
+  });
 
-  const handleReadMessages = async (convoId) => {
+  const handleReadMessages = (convoId) => {
     const ids = {
       conversationId: convoId
     }
-    await readMessages(ids);
+    dispatch(readMessages(ids));
   }
 
   // Read unread messages since last update
   useEffect(() => {
     // Return if no messages or there are no messages to read
-    if (!props.conversation?.messages) return;
-    if (!props.conversation.unreadMessages) return;
-    const { conversation } = props;
+    if (!conversation?.messages) return;
+    if (!conversation.unreadMessages) return;
     handleReadMessages(conversation.id);
     // eslint-disable-next-line
-  }, [props.conversation]);
+  }, [conversation]);
 
   return (
     <Box className={classes.root}>
@@ -73,23 +79,4 @@ const ActiveChat = (props) => {
   );
 };
 
-const mapStateToProps = (state) => {
-  return {
-    user: state.user,
-    conversation:
-      state.conversations &&
-      state.conversations.find(
-        (conversation) => conversation.otherUser.username === state.activeConversation
-      )
-  };
-};
-
-const mapDispatchToProps = (dispatch) => {
-  return {
-    readMessages: (ids) => {
-      dispatch(readMessages(ids));
-    },
-  };
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(ActiveChat);
+export default ActiveChat;
