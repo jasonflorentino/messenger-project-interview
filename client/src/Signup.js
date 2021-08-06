@@ -49,6 +49,7 @@ const Login = (props) => {
               <FormControl>
                 <TextField
                   aria-label="username"
+                  autoComplete="username"
                   label="Username"
                   name="username"
                   type="text"
@@ -61,6 +62,7 @@ const Login = (props) => {
                 <TextField
                   label="E-mail address"
                   aria-label="e-mail address"
+                  autoComplete="email"
                   type="email"
                   name="email"
                   required
@@ -71,6 +73,7 @@ const Login = (props) => {
               <FormControl error={!!formErrorMessage.confirmPassword}>
                 <TextField
                   aria-label="password"
+                  autoComplete="new-password"
                   label="Password"
                   type="password"
                   inputProps={{ minLength: 6 }}
@@ -87,6 +90,7 @@ const Login = (props) => {
                 <TextField
                   label="Confirm Password"
                   aria-label="confirm password"
+                  autoComplete="confirm-password"
                   type="password"
                   inputProps={{ minLength: 6 }}
                   name="confirmPassword"

@@ -43,6 +43,7 @@ const Login = (props) => {
                   label="Username"
                   name="username"
                   type="text"
+                  autoComplete="username"
                 />
               </FormControl>
             </Grid>
@@ -52,6 +53,7 @@ const Login = (props) => {
                 aria-label="password"
                 type="password"
                 name="password"
+                autoComplete="password"
               />
             </FormControl>
             <Grid>
