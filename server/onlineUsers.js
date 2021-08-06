@@ -1,12 +1,21 @@
 const onlineUsers = {
+  /**
+   * @name _onlineUsers
+   * @type {Map<Number, Set<Number>>}  
+   * @description Maps `userIds` to a Set that stores `socketIds`
+   */
   _onlineUsers: new Map(),
+  /**
+   * @name _socketsByUser  
+   * @type {Map<Number, Number>}  
+   * @description Maps `socketIds` to their respective `userId`
+   */
   _socketsByUser: new Map(),
+  /** Checks if a user is online given their ID */
   isOnline: function(id) {
     return this._onlineUsers.has(id);
   },
-  includes: function(id) {
-    return this.isOnline(id);
-  },
+  /** Adds a new socketId to the collection of online users */
   add: function(id, socketId) {
     if (this.isOnline(id)) {
       this._onlineUsers.get(id).add(socketId);
@@ -15,6 +24,7 @@ const onlineUsers = {
     }
     this._addSocket(id, socketId);
   },
+  /** Removes a socketId from the collection of online users */
   remove: function(id, socketId) {
     if (this.isOnline(id)) {
       const sessions = this._onlineUsers.get(id);
@@ -25,6 +35,7 @@ const onlineUsers = {
       }
     }
   },
+  /** Gets a list of all `socketIds` given some `userId` */
   getSocketsByUserId: function(id) {
     const userSessions = this._onlineUsers.get(id);
     if (userSessions) {
@@ -33,13 +44,16 @@ const onlineUsers = {
       return [];
     }
   },
-  getUserBySocket(socketId) {
+  /** Gets a `userId` given some `socketId` */
+  getUserBySocket: function(socketId) {
     return this._socketsByUser.get(socketId);
   },
-  _addSocket(id, socketId) {
+  /** @private Stores a `userId` for a given `socketId` */
+  _addSocket: function(id, socketId) {
     this._socketsByUser.set(socketId, id);
   },
-  _removeSocket(socketId) {
+  /** @private Removes a `socketId` from the store of `socketIds` */
+  _removeSocket: function(socketId) {
     this._socketsByUser.delete(socketId);
   },
 };
